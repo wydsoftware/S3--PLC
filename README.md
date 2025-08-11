@@ -1,8 +1,95 @@
-# 汇川S3 PLC数据采集系统
+# S3 PLC数据采集系统
 
-## 项目概述
+## 项目简介
 
-本项目是一个专为汇川S3 PLC设计的Windows常驻数据采集程序，能够自动采集48个预定义点位的数据并保存到SQLite数据库中。程序支持GUI界面模式和Windows服务模式，提供实时数据监控、日志记录和系统配置功能。
+这是一个专为汇川S3系列PLC设计的数据采集与监控系统，支持实时数据采集、数据存储和系统托盘运行。
+
+## 主要功能
+
+- **实时数据采集**: 支持汇川S3系列PLC的Modbus TCP通信
+- **数据存储**: 使用SQLite数据库存储采集数据和配置信息
+- **系统服务**: 可作为Windows服务运行，支持开机自启
+- **系统托盘**: 提供系统托盘界面，方便监控和管理
+- **WPF界面**: 现代化的用户界面，支持实时数据显示
+
+## 系统架构
+
+### 核心组件
+
+- **S3PLCDataCollector**: 主程序，包含WPF界面和数据采集逻辑
+- **DatabaseService**: 数据库服务，负责数据存储和查询
+- **PLCService**: PLC通信服务，处理Modbus TCP通信
+- **DataCollectionService**: 数据采集服务，协调各组件工作
+- **WindowsServiceHost**: Windows服务宿主
+
+### 辅助工具
+
+- **db_init**: 数据库初始化工具
+- **db_check**: 数据库检查工具
+- **plc_test**: PLC连接测试工具
+- **test_console**: 控制台测试程序
+
+## 数据库结构
+
+### device_config 表
+存储设备配置信息，包括48个预定义的数据点位配置。
+
+### device_data 表
+存储实时采集的设备数据。
+
+### read_log 表
+存储数据读取日志。
+
+### system_config 表
+存储系统配置参数。
+
+## 快速开始
+
+### 环境要求
+
+- .NET 6.0 或更高版本
+- Windows 10/11 或 Windows Server 2016+
+- 汇川S3系列PLC（支持Modbus TCP）
+
+### 安装步骤
+
+1. **编译项目**
+   ```bash
+   dotnet build S3PLCDataCollector.csproj
+   ```
+
+2. **初始化数据库**
+   ```bash
+   dotnet run --project db_init
+   ```
+
+3. **配置连接**
+   编辑 `appsettings.json` 文件，设置PLC IP地址和端口
+
+4. **运行程序**
+   ```bash
+   dotnet run
+   ```
+
+### 服务安装
+
+以管理员身份运行 `install_service.bat` 安装服务，运行 `uninstall_service.bat` 卸载服务。
+
+## 技术栈
+
+- **.NET 6.0**: 主要开发框架
+- **WPF**: 用户界面框架
+- **SQLite**: 数据存储
+- **Modbus TCP**: PLC通信协议
+- **Windows Services**: 系统服务
+
+## 许可证
+
+本项目采用 MIT 许可证。
+
+## 联系方式
+
+如有问题或建议，请联系：1025646629@qq.com
 
 ## 功能特性
 
