@@ -12,8 +12,41 @@ class Program
             using var connection = new SqliteConnection(connectionString);
             connection.Open();
             
-            // 检查device_config表
-            Console.WriteLine("=== Device Config ===");
+            // 统计总设备配置数量
+            Console.WriteLine("=== 设备配置统计 ===");
+            using var totalCmd = new SqliteCommand("SELECT COUNT(*) as total FROM device_config WHERE is_enabled = 1", connection);
+            var totalCount = Convert.ToInt32(totalCmd.ExecuteScalar());
+            Console.WriteLine($"启用的设备总数: {totalCount}");
+            
+            // 按设备类型统计
+            Console.WriteLine("\n=== 按设备类型统计 ===");
+            var deviceTypes = new[] { "AOI", "CCM08", "CCM23", "CNC" };
+            
+            foreach (var type in deviceTypes)
+            {
+                using var typeCmd = new SqliteCommand($"SELECT COUNT(*) FROM device_config WHERE device_name LIKE '{type}%' AND is_enabled = 1", connection);
+                var typeCount = Convert.ToInt32(typeCmd.ExecuteScalar());
+                Console.WriteLine($"{type}设备数量: {typeCount}");
+            }
+            
+            // 统计有数据的设备数量
+            Console.WriteLine("\n=== 数据统计 ===");
+            using var dataCountCmd = new SqliteCommand("SELECT COUNT(*) FROM device_data", connection);
+            var dataCount = Convert.ToInt32(dataCountCmd.ExecuteScalar());
+            Console.WriteLine($"有数据的设备数量: {dataCount}");
+            
+            // 检查数据值分布
+            Console.WriteLine("\n=== 数据值分布 ===");
+            using var valueCmd = new SqliteCommand("SELECT current_value, COUNT(*) as count FROM device_data GROUP BY current_value ORDER BY current_value", connection);
+            using var valueReader = valueCmd.ExecuteReader();
+            
+            while (valueReader.Read())
+            {
+                Console.WriteLine($"值 {valueReader["current_value"]}: {valueReader["count"]} 个设备");
+            }
+            
+            // 检查device_config表前5个设备
+            Console.WriteLine("\n=== Device Config (前5个) ===");
             using var configCmd = new SqliteCommand("SELECT device_name, device_address, address_number, is_enabled FROM device_config LIMIT 5", connection);
             using var configReader = configCmd.ExecuteReader();
             while (configReader.Read())

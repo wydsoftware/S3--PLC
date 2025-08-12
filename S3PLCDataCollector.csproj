@@ -39,12 +39,27 @@
     <Compile Remove="db_init\**" />
     <Compile Remove="db_check\**" />
     <Compile Remove="plc_test\**" />
+    <Compile Remove="test_console\**" />
+    <Compile Remove="test_mapping\**" />
+    <Compile Remove="ccm_check\**" />
+    <Compile Remove="PLC_CNC_TEST\**" />
+    <Compile Remove="installer\**" />
     <EmbeddedResource Remove="db_init\**" />
     <EmbeddedResource Remove="db_check\**" />
     <EmbeddedResource Remove="plc_test\**" />
+    <EmbeddedResource Remove="test_console\**" />
+    <EmbeddedResource Remove="test_mapping\**" />
+    <EmbeddedResource Remove="ccm_check\**" />
+    <EmbeddedResource Remove="PLC_CNC_TEST\**" />
+    <EmbeddedResource Remove="installer\**" />
     <None Remove="db_init\**" />
     <None Remove="db_check\**" />
     <None Remove="plc_test\**" />
+    <None Remove="test_console\**" />
+    <None Remove="test_mapping\**" />
+    <None Remove="ccm_check\**" />
+    <None Remove="PLC_CNC_TEST\**" />
+    <None Remove="installer\**" />
   </ItemGroup>
 
 </Project>

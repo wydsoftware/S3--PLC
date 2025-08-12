@@ -1,0 +1,174 @@
+# PDA移动端派工系统配置文件
+# 通用配置
+spring:
+  application:
+    name: pda-system
+  profiles:
+    active: dev
+  
+  # 数据源配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/pda_system?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: pda_user
+    password: Pda@2024#Secure
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: PDAHikariCP
+  
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        use_sql_comments: true
+    open-in-view: false
+  
+  # Web配置
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  
+  # 文件上传配置
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+      enabled: true
+  
+  # Jackson配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+# 服务器配置
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+
+# 日志配置
+logging:
+  level:
+    com.pda: DEBUG
+    org.springframework: INFO
+    org.hibernate: INFO
+    org.springframework.security: DEBUG
+    root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: ./logs/pda-system.log
+    max-size: 100MB
+    max-history: 30
+    total-size-cap: 1GB
+
+# 应用自定义配置
+app:
+  # PLC配置
+  plc:
+    default-ip: 192.168.100.1
+    default-port: 502
+    connection-timeout: 5000
+    read-timeout: 3000
+    retry-count: 3
+    retry-interval: 1000
+  
+  # 安全配置
+  security:
+    jwt:
+      secret: pda-system-jwt-secret-key-2024-mobile-dispatch-system
+      expiration: 86400000  # 24小时 (毫秒)
+      header: Authorization
+      prefix: Bearer 
+    cors:
+      allowed-origins: "*"
+      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+      allowed-headers: "*"
+      allow-credentials: true
+      max-age: 3600
+  
+  # 文件上传配置
+  upload:
+    path: ./uploads
+    max-file-size: 10MB
+    max-request-size: 50MB
+    allowed-extensions: jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx
+  
+  # 系统配置
+  system:
+    default-admin-username: admin
+    default-admin-password: 123456
+    session-timeout: 1800  # 30分钟
+    max-login-attempts: 5
+    lockout-duration: 300  # 5分钟
+  
+  # 设备配置
+  device:
+    types:
+      - AOI
+      - CNC
+      - CCM08
+      - CCM23
+    total-count: 48
+    aoi-count: 8
+    cnc-count: 16
+    ccm08-count: 16
+    ccm23-count: 8
+
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+
+# 应用信息
+info:
+  app:
+    name: PDA移动端派工系统
+    description: 工业设备移动端派工管理系统
+    version: 1.0.0
+    encoding: UTF-8
+    java:
+      version: ${java.version}
+  build:
+    artifact: ${project.artifactId}
+    name: ${project.name}
+    description: ${project.description}
+    version: ${project.version}

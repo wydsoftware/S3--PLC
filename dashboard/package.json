@@ -1,0 +1,25 @@
+{
+  "name": "s3-plc-dashboard-api",
+  "version": "1.0.0",
+  "description": "S3 PLC数据采集监控大屏API服务",
+  "main": "api-server.js",
+  "scripts": {
+    "start": "node api-server.js",
+    "dev": "node api-server.js"
+  },
+  "keywords": [
+    "plc",
+    "modbus",
+    "dashboard",
+    "monitoring",
+    "cnc"
+  ],
+  "author": "S3 PLC Team",
+  "license": "MIT",
+  "dependencies": {
+    "sqlite3": "^5.1.6"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

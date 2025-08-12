@@ -1,0 +1,108 @@
+========================================
+    S3 PLC数据采集系统 安装包说明
+========================================
+
+版本信息：
+- 程序版本：1.0.0
+- .NET版本：9.0
+- 目标平台：Windows x64
+- 发布类型：自包含部署
+
+系统要求：
+- 操作系统：Windows 10/11 或 Windows Server 2016+
+- 架构：x64 (64位)
+- 内存：至少 2GB RAM
+- 磁盘空间：至少 500MB 可用空间
+- 网络：支持TCP/IP通信（用于PLC连接）
+
+安装步骤：
+1. 以管理员身份运行 install.bat
+2. 等待安装完成
+3. 程序将自动安装为Windows服务并启动
+4. 桌面将创建快捷方式
+
+安装内容：
+- 主程序：S3PLCDataCollector.exe
+- 配置文件：appsettings.json
+- 数据库文件：plc_data.db（自动初始化）
+- 辅助工具：
+  * db_init.exe - 数据库初始化工具
+  * check_db.exe - 数据库检查工具
+- 服务管理脚本：
+  * install_service.bat - 安装服务
+  * uninstall_service.bat - 卸载服务
+  * 启动程序.bat - 直接启动程序
+
+默认安装位置：
+C:\Program Files\S3PLCDataCollector\
+
+配置说明：
+安装完成后，请编辑配置文件设置PLC连接参数：
+文件位置：C:\Program Files\S3PLCDataCollector\appsettings.json
+
+主要配置项：
+{
+  "PLCSettings": {
+    "IPAddress": "192.168.1.100",  // PLC IP地址
+    "Port": 502,                    // Modbus TCP端口
+    "ReadInterval": 1000,           // 读取间隔(毫秒)
+    "ConnectionTimeout": 5000       // 连接超时(毫秒)
+  },
+  "DatabaseSettings": {
+    "ConnectionString": "Data Source=plc_data.db;Cache=Shared"
+  }
+}
+
+运行模式：
+1. Windows服务模式（推荐）：
+   - 开机自动启动
+   - 后台运行，无界面
+   - 使用服务管理器或脚本管理
+
+2. 桌面应用模式：
+   - 双击桌面快捷方式启动
+   - 显示WPF界面
+   - 支持系统托盘运行
+
+数据库说明：
+- 类型：SQLite
+- 文件：plc_data.db
+- 表结构：
+  * device_config - 设备配置（48个预定义点位）
+  * device_data - 实时数据
+  * read_log - 读取日志
+  * system_config - 系统配置
+
+卸载说明：
+1. 以管理员身份运行 uninstall.bat
+2. 程序文件将被删除
+3. 数据库文件会自动备份到用户文档目录
+4. Windows服务将被移除
+
+故障排除：
+1. 安装失败：
+   - 确保以管理员身份运行
+   - 检查磁盘空间是否充足
+   - 关闭杀毒软件重试
+
+2. 服务启动失败：
+   - 检查配置文件格式
+   - 查看Windows事件日志
+   - 尝试直接运行程序检查错误
+
+3. PLC连接失败：
+   - 检查网络连接
+   - 验证IP地址和端口
+   - 确认PLC支持Modbus TCP
+
+技术支持：
+如有问题，请联系：1025646629@qq.com
+
+更新日志：
+v1.0.0 (2024)
+- 初始版本发布
+- 支持汇川S3系列PLC数据采集
+- WPF界面和Windows服务双模式
+- SQLite数据库存储
+- 48个预定义数据点位
+- 完整的安装/卸载程序

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNC设备监控大屏</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#0E2F56',
+                        accent: '#00C1D4',
+                        success: '#00B42A',
+                        warning: '#FF7D00',
+                        danger: '#F53F3F',
+                        info: '#86909C',
+                        dark: '#1D2129',
+                        light: '#F2F3F5'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                },
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .card-glow {
+                box-shadow: 0 0 15px rgba(22, 93, 255, 0.3);
+            }
+            .gradient-bg {
+                background: linear-gradient(135deg, #0E2F56 0%, #165DFF 100%);
+            }
+            .grid-devices {
+                display: grid;
+                grid-template-columns: repeat(6, 1fr);
+                gap: 1rem;
+            }
+            @media (max-width: 1536px) {
+                .grid-devices {
+                    grid-template-columns: repeat(4, 1fr);
+                }
+            }
+            @media (max-width: 1024px) {
+                .grid-devices {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+            }
+            @media (max-width: 768px) {
+                .grid-devices {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+            @media (max-width: 640px) {
+                .grid-devices {
+                    grid-template-columns: repeat(1, 1fr);
+                }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-light min-h-screen overflow-x-hidden">
+    <!-- 顶部信息栏 -->
+    <header class="gradient-bg p-6 mb-8 shadow-lg">
+        <div class="container mx-auto">
+            <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-center mb-6 text-shadow">CNC 设备生产监控系统</h1>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="bg-secondary/60 backdrop-blur-sm rounded-lg p-4 card-glow transition-transform hover:scale-105">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-info text-sm">总设备</p>
+                            <p class="text-2xl md:text-3xl font-bold text-white" id="total-devices">16</p>
+                        </div>
+                        <div class="text-primary text-3xl">
+                            <i class="fa fa-cogs"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-success/60 backdrop-blur-sm rounded-lg p-4 card-glow transition-transform hover:scale-105">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-info text-sm">运行中</p>
+                            <p class="text-2xl md:text-3xl font-bold text-white" id="running-devices">12</p>
+                        </div>
+                        <div class="text-success text-3xl">
+                            <i class="fa fa-play-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-warning/60 backdrop-blur-sm rounded-lg p-4 card-glow transition-transform hover:scale-105">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-info text-sm">待机</p>
+                            <p class="text-2xl md:text-3xl font-bold text-white" id="standby-devices">3</p>
+                        </div>
+                        <div class="text-warning text-3xl">
+                            <i class="fa fa-pause-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-danger/60 backdrop-blur-sm rounded-lg p-4 card-glow transition-transform hover:scale-105">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-info text-sm">维修</p>
+                            <p class="text-2xl md:text-3xl font-bold text-white" id="maintenance-devices">1</p>
+                        </div>
+                        <div class="text-danger text-3xl">
+                            <i class="fa fa-wrench"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-primary/60 backdrop-blur-sm rounded-lg p-4 card-glow transition-transform hover:scale-105">
+                    <div class="flex flex-col">
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="text-info text-sm">稼动率</p>
+                            <div class="text-primary text-xl">
+                                <i class="fa fa-tachometer"></i>
+                            </div>
+                        </div>
+                        <p class="text-2xl md:text-3xl font-bold text-white" id="utilization-rate">0%</p>
+                    </div>
+                </div>
+                
+                <div class="bg-accent/60 backdrop-blur-sm rounded-lg p-4 card-glow transition-transform hover:scale-105">
+                    <div class="flex flex-col">
+                        <p class="text-info text-sm text-center mb-2">更新时间</p>
+                        <p class="text-xl font-bold text-white text-center" id="update-time">2025-01-08 09:30:45</p>
+                        <div class="mt-2 text-center">
+                            <i class="fa fa-refresh text-accent animate-spin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <main class="container mx-auto px-4 pb-12">
+        <h2 class="text-xl md:text-2xl font-bold mb-6 text-primary">CNC设备实时采集数据</h2>
+        
+        <div class="grid-devices" id="devices-container">
+            <!-- 设备卡片将通过JavaScript动态生成 -->
+        </div>
+    </main>
+
+    <script>
+        // CNC设备配置（初始化为空，将从API获取数据）
+        let cncDevices = [
+            { id: 'CNC-01', name: 'CNC-01', status: 'running', count: 0, workOrder: 'WO20250108001', startTime: '08:15:32', lastUpdate: '08:15:32' },
+            { id: 'CNC-02', name: 'CNC-02', status: 'running', count: 0, workOrder: 'WO20250108002', startTime: '08:30:15', lastUpdate: '08:30:15' },
+            { id: 'CNC-03', name: 'CNC-03', status: 'running', count: 0, workOrder: 'WO20250108003', startTime: '07:45:20', lastUpdate: '07:45:20' },
+            { id: 'CNC-04', name: 'CNC-04', status: 'running', count: 0, workOrder: 'WO20250108004', startTime: '09:00:05', lastUpdate: '09:00:05' },
+            { id: 'CNC-05', name: 'CNC-05', status: 'running', count: 0, workOrder: 'WO20250108005', startTime: '08:45:10', lastUpdate: '08:45:10' },
+            { id: 'CNC-06', name: 'CNC-06', status: 'running', count: 0, workOrder: 'WO20250108006', startTime: '08:00:00', lastUpdate: '08:00:00' },
+            { id: 'CNC-07', name: 'CNC-07', status: 'standby', count: 0, workOrder: 'WO20250108007', startTime: '待机中', lastUpdate: '09:30:00' },
+            { id: 'CNC-08', name: 'CNC-08', status: 'standby', count: 0, workOrder: 'WO20250108008', startTime: '待机中', lastUpdate: '10:15:30' },
+            { id: 'CNC-09', name: 'CNC-09', status: 'standby', count: 0, workOrder: 'WO20250108009', startTime: '待机中', lastUpdate: '11:20:45' },
+            { id: 'CNC-10', name: 'CNC-10', status: 'offline', count: 0, workOrder: 'WO20250108010', startTime: '维修中', lastUpdate: '12:00:00' },
+            { id: 'CNC-11', name: 'CNC-11', status: 'running', count: 0, workOrder: 'WO20250108011', startTime: '07:30:45', lastUpdate: '07:30:45' },
+            { id: 'CNC-12', name: 'CNC-12', status: 'running', count: 0, workOrder: 'WO20250108012', startTime: '08:20:15', lastUpdate: '08:20:15' },
+            { id: 'CNC-13', name: 'CNC-13', status: 'running', count: 0, workOrder: 'WO20250108013', startTime: '07:15:30', lastUpdate: '07:15:30' },
+            { id: 'CNC-14', name: 'CNC-14', status: 'running', count: 0, workOrder: 'WO20250108014', startTime: '08:50:20', lastUpdate: '08:50:20' },
+            { id: 'CNC-15', name: 'CNC-15', status: 'running', count: 0, workOrder: 'WO20250108015', startTime: '08:10:45', lastUpdate: '08:10:45' },
+            { id: 'CNC-16', name: 'CNC-16', status: 'running', count: 0, workOrder: 'WO20250108016', startTime: '07:55:10', lastUpdate: '07:55:10' }
+        ];
+
+        // 状态配置
+        const statusConfig = {
+            'running': {
+                bgColor: 'bg-success/20',
+                badgeColor: 'bg-success',
+                timeColor: 'bg-success/20 text-success',
+                icon: 'fa-play',
+                displayName: '运行中'
+            },
+            'standby': {
+                bgColor: 'bg-warning/20',
+                badgeColor: 'bg-warning',
+                timeColor: 'bg-warning/20 text-warning',
+                icon: 'fa-pause',
+                displayName: '待机'
+            },
+            'offline': {
+                bgColor: 'bg-danger/20',
+                badgeColor: 'bg-danger',
+                timeColor: 'bg-danger/20 text-danger',
+                icon: 'fa-wrench',
+                displayName: '维修中'
+            }
+        };
+
+        // 生成设备卡片HTML
+        function generateDeviceCard(device) {
+            const config = statusConfig[device.status] || statusConfig['offline'];
+            const runningTime = device.status === 'running' ? calculateRunningTime(device.startTime) : device.startTime;
+            
+            return `
+                <div class="bg-secondary/30 backdrop-blur-sm rounded-xl overflow-hidden border border-primary/20 transition-all duration-300 hover:border-primary/60 hover:shadow-lg hover:shadow-primary/20 transform hover:-translate-y-1">
+                    <div class="${config.bgColor} p-3 flex justify-between items-center">
+                        <h3 class="font-bold text-white">${device.name}</h3>
+                        <span class="${config.badgeColor} px-2 py-1 rounded-full text-xs font-medium">${config.displayName}</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center">
+                                <i class="fa fa-industry text-primary text-2xl"></i>
+                            </div>
+                            <div class="flex flex-col items-end">
+                                <div class="${config.timeColor} text-xs px-2 py-1 rounded-full">
+                                    <i class="fa fa-clock-o mr-1"></i>${runningTime}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-info">派工单编号:</span>
+                                <span class="font-medium">${device.workOrder}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-info">状态时间:</span>
+                                <span class="font-medium">${device.lastUpdate}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-info">采集数量:</span>
+                                <div class="flex items-center">
+                                    <span class="font-medium mr-2 text-accent text-lg" id="${device.id.toLowerCase()}-count">${device.count}</span>
+                                    <span class="text-info text-sm">件</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 计算运行时间
+        function calculateRunningTime(startTime) {
+            if (startTime === '待机中' || startTime === '维修中') return startTime;
+            
+            const now = new Date();
+            const start = new Date();
+            const [hours, minutes, seconds] = startTime.split(':');
+            start.setHours(parseInt(hours), parseInt(minutes), parseInt(seconds));
+            
+            const diff = now - start;
+            const totalMinutes = Math.floor(diff / (1000 * 60));
+            const displayHours = Math.floor(totalMinutes / 60);
+            const displayMinutes = totalMinutes % 60;
+            
+            if (displayHours > 0) {
+                return `已运行: ${displayHours}小时${displayMinutes}分钟`;
+            } else {
+                return `已运行: ${displayMinutes}分钟`;
+            }
+        }
+
+        // 渲染所有设备卡片
+        function renderDevices() {
+            const container = document.getElementById('devices-container');
+            container.innerHTML = cncDevices.map(device => generateDeviceCard(device)).join('');
+        }
+
+        // 更新时间显示
+        function updateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('update-time').textContent = 
+                `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+
+        // 更新设备统计数据
+        function updateDeviceCounts() {
+            const counts = {
+                'running': 0,
+                'standby': 0,
+                'offline': 0
+            };
+            
+            cncDevices.forEach(device => {
+                counts[device.status]++;
+            });
+            
+            // 计算稼动率（运行中设备数 / 总设备数 * 100%）
+            const totalDevices = cncDevices.length;
+            const utilizationRate = totalDevices > 0 ? Math.round((counts['running'] / totalDevices) * 100) : 0;
+            
+            // 更新显示
+            document.getElementById('running-devices').textContent = counts['running'];
+            document.getElementById('standby-devices').textContent = counts['standby'];
+            document.getElementById('maintenance-devices').textContent = counts['offline'];
+            document.getElementById('utilization-rate').textContent = utilizationRate + '%';
+        }
+
+        // 显示错误消息
+        function showErrorMessage(message) {
+            // 创建错误提示元素
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+            errorDiv.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(errorDiv);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.parentNode.removeChild(errorDiv);
+                }
+            }, 3000);
+        }
+
+        // 从S3 PLC数据库获取实时数据
+        async function fetchS3PLCData() {
+            try {
+                const response = await fetch('/api/cnc-devices');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.devices) {
+                    // 更新设备数据
+                    data.devices.forEach(apiDevice => {
+                        const device = cncDevices.find(d => d.id === apiDevice.id);
+                        if (device) {
+                            device.count = apiDevice.count;
+                            device.status = apiDevice.status;
+                            device.workOrder = apiDevice.workOrder;
+                            device.startTime = apiDevice.startTime;
+                            // 格式化状态时间为HH:MM:SS格式
+                            if (apiDevice.lastUpdate) {
+                                const updateTime = new Date(apiDevice.lastUpdate);
+                                const hours = String(updateTime.getHours()).padStart(2, '0');
+                                const minutes = String(updateTime.getMinutes()).padStart(2, '0');
+                                const seconds = String(updateTime.getSeconds()).padStart(2, '0');
+                                device.lastUpdate = `${hours}:${minutes}:${seconds}`;
+                            } else {
+                                // 如果没有lastUpdate，使用当前时间
+                                const now = new Date();
+                                const hours = String(now.getHours()).padStart(2, '0');
+                                const minutes = String(now.getMinutes()).padStart(2, '0');
+                                const seconds = String(now.getSeconds()).padStart(2, '0');
+                                device.lastUpdate = `${hours}:${minutes}:${seconds}`;
+                            }
+                        }
+                    });
+                    
+                    // 更新统计数据
+                    if (data.stats) {
+                        document.getElementById('total-devices').textContent = data.stats.total;
+                        document.getElementById('running-devices').textContent = data.stats.running;
+                        document.getElementById('standby-devices').textContent = data.stats.standby;
+                        document.getElementById('maintenance-devices').textContent = data.stats.offline;
+                        
+                        // 计算稼动率（运行中设备数 / 总设备数 * 100%）
+                        const utilizationRate = data.stats.total > 0 ? Math.round((data.stats.running / data.stats.total) * 100) : 0;
+                        document.getElementById('utilization-rate').textContent = utilizationRate + '%';
+                    }
+                    
+                    // 重新渲染设备
+                    renderDevices();
+                    
+                    console.log(`成功获取${data.devices.length}台CNC设备数据`);
+                } else {
+                    console.error('API返回数据格式错误:', data);
+                }
+                
+            } catch (error) {
+                console.error('获取S3 PLC数据失败:', error);
+                // 在页面上显示错误信息
+                showErrorMessage('数据连接失败，请检查API服务是否正常运行');
+            }
+        }
+
+        // 初始化
+        function init() {
+            renderDevices();
+            updateTime();
+            updateDeviceCounts();
+            
+            // 定时更新
+            setInterval(updateTime, 1000);
+            setInterval(fetchS3PLCData, 5000); // 每5秒从数据库获取一次实时数据
+            
+            // 立即获取一次数据
+            fetchS3PLCData();
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
+    

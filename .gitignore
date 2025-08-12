@@ -329,3 +329,30 @@ FodyWeavers.xsd
 *.db-wal
 logs/
 error.txt
+
+# ---- Custom ignores for this repo ----
+
+# Java/Maven build outputs
+PDA/backend/target/
+**/target/
+
+# IDE metadata
+.idea/
+.project
+.classpath
+
+# Node build outputs
+ dashboard/dist/
+ dashboard/build/
+
+# Installer artifacts and large binaries
+installer/
+installer.zip
+
+# Compiled binaries
+*.exe
+*.dll
+
+# Python cache
+__pycache__/
+*.pyc

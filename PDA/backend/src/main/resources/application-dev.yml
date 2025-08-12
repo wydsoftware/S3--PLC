@@ -1,0 +1,86 @@
+# 开发环境配置
+# 版本: 1.0.0
+# 环境: Development
+
+spring:
+  # 开发环境数据源配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/pda_system?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: pda_user
+    password: pda_password
+    
+    # 开发环境连接池配置
+    hikari:
+      minimum-idle: 2
+      maximum-pool-size: 10
+      connection-timeout: 20000
+      validation-timeout: 3000
+      leak-detection-threshold: 60000
+  
+  # 开发环境JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: update # 开发环境自动更新表结构
+    show-sql: true # 开发环境显示SQL
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        generate_statistics: false
+  
+  # 开发环境Jackson配置
+  jackson:
+    serialization:
+      indent-output: true # 开发环境格式化JSON输出
+
+# 开发环境日志配置
+logging:
+  level:
+    root: INFO
+    com.pda: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.transaction: DEBUG
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"
+
+# 开发环境监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*' # 开发环境暴露所有端点
+  endpoint:
+    health:
+      show-details: always # 开发环境显示详细健康信息
+    shutdown:
+      enabled: true # 开发环境启用远程关闭
+
+# 开发环境自定义配置
+pda:
+  # 开发环境JWT配置
+  jwt:
+    expiration: 86400 # 开发环境24小时过期
+  
+  # 开发环境PLC配置
+  plc:
+    default-ip: 127.0.0.1 # 开发环境使用本地IP
+    default-timeout: 10000 # 开发环境延长超时时间
+    retry-times: 1 # 开发环境减少重试次数
+  
+  # 开发环境系统配置
+  system:
+    debug-mode: true
+    mock-plc: true # 开发环境启用PLC模拟
+    
+# 开发环境特定配置
+debug: true
+
+# 开发环境服务器配置
+server:
+  error:
+    include-stacktrace: always # 开发环境包含堆栈跟踪
+    include-message: always
+    include-binding-errors: always
